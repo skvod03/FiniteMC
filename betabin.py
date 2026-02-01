@@ -2,17 +2,35 @@ import numpy as np
 import scipy.integrate as spi
 from scipy.integrate import quad_vec
 from scipy.stats import binom, beta as beta_dist
-import matplotlib.pyplot as plt
+from gridaprox import OneDGridAprox, Eh_pi, test_functions
+from scipy.special import poch, beta as beta_fn, digamma
 
+
+def moment(alpha, beta, r):
+    # E[X^r] = (alpha)_r / (alpha+beta)_r
+    return poch(alpha, r) / poch(alpha + beta, r)
+
+def beta_mixed(alpha, beta, p, q):
+    # E[X^p (1-X)^q] = B(alpha+p, beta+q) / B(alpha,beta)
+    return beta_fn(alpha + p, beta + q) / beta_fn(alpha, beta)
+
+def beta_logx(alpha, beta):
+    return digamma(alpha) - digamma(alpha + beta)
+
+def beta_log1mx(alpha, beta):
+    return digamma(beta) - digamma(alpha + beta)
+
+
+TEST_FUNCTIONS = {"moment": moment, "beta_mixed": beta_mixed, "logx": beta_logx, "log1mx": beta_log1mx}
 
 class BetaBinomialMarkovChain:
-    def __init__(self, x_0, n, alpha, beta):
+    def __init__(self, x_0, n, alpha, beta, test_function=None, test_function_params=None):
         self.x_0 = float(x_0)
         self.n = int(n)
         self.alpha = float(alpha)
         self.beta = float(beta)
-        self.chain = [self.x_0]
         self.state = self.x_0
+        self.chain = [self.x_0]
 
         # fixed k-grid for the binomial mixture
         self.k = np.arange(self.n + 1)
@@ -79,13 +97,6 @@ class BetaBinomialMarkovChain:
             return K[:, 0]          # (Nx,)
         return K                    # (Nx, Ny)
 
-    # Keep old name if you want a scalar-friendly wrapper
-    def Kernel(self, x, y):
-        return self.kernel_xy(x, y)
-
-    def Stationary(self, x):
-        return beta_dist.pdf(x, self.alpha, self.beta)
-
     # ----------------------------
     # Next distribution via quad_vec
     # ----------------------------
@@ -107,6 +118,12 @@ class BetaBinomialMarkovChain:
     def RunChain(self, steps):
         for _ in range(int(steps)):
             self.SimulateNext()
+
+    def test_error(self, h, m , test_function_name, *test_params):
+        pi_hat, x_grid = OneDGridAprox(self, h, m)
+        truth = TEST_FUNCTIONS[test_function_name](self.alpha, self.beta, *test_params)
+        est = Eh_pi(pi_hat, x_grid, test_functions(test_function_name, *test_params))
+        return abs(est - truth)
 
 
 
