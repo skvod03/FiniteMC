@@ -1,10 +1,10 @@
 # FiniteMC
 
-This repository contains code and notes for a research project conducted under the supervision of **Peter Glynn** on **error analysis for estimating stationary distributions of Markov chains with compact, continuous state spaces**. :contentReference[oaicite:1]{index=1}
+This repository contains code and notes for a research project conducted under the supervision of **Peter Glynn** on **error analysis for estimating stationary distributions of Markov chains with compact, continuous state spaces**. 
 
 ## Project focus
 
-The goal of this project is to understand and quantify the approximation error that arises when computing or estimating a stationary distribution for a Markov chain evolving on a **compact (closed and bounded)** continuous domain (e.g. $[0,1]$ or $[0,1]^d$). We study both methodological and numerical sources of error, including discretization bias and Monte Carlo / quasi–Monte Carlo integration error. :contentReference[oaicite:2]{index=2}
+The goal of this project is to understand and quantify the approximation error that arises when computing or estimating a stationary distribution for a Markov chain evolving on a **compact (closed and bounded)** continuous domain (e.g. $[0,1]$ or $[0,1]^d$). We study both methodological and numerical sources of error, including discretization bias and Monte Carlo / quasi–Monte Carlo integration error. 
 
 ## Methods studied
 
@@ -31,13 +31,11 @@ A 1D chain on $[0,1]$ with an explicit transition kernel and known stationary di
 ### 2) Compact AR(1) on $[0,1]$ with CF + inverse FFT benchmark
 
 A compact AR(1)-type chain
-$$
-X_{n+1} = (1-\lambda) X_n + \lambda Z_{n+1}, \qquad Z_{n+1}\in[0,1]
-$$
+$X_{n+1} = (1-\lambda) X_n + \lambda Z_{n+1}, Z_{n+1}\in[0,1]$
 where the innovations $Z_{n}$ are i.i.d. from a compact distribution (e.g. Beta or truncated normal on $[0,1]$).
 
 For this model, the stationary characteristic function admits an infinite-product form (because the recursion is linear with i.i.d. innovations), and we can recover an accurate stationary density by **inverse Fourier transform using FFT**. In practice:
-- we truncate the product at a data-driven level (tail controlled by powers of $(1-\lambda)$),
+- we truncate the product at a data-driven level (tail controlled by powers of $1-\lambda$),
 - invert using a uniform frequency grid and FFT,
 - and validate accuracy via moment checks (mean/variance) against analytic formulas.
 
