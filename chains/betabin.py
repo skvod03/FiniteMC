@@ -119,8 +119,8 @@ class BetaBinomialMarkovChain:
         for _ in range(int(steps)):
             self.SimulateNext()
 
-    def test_error(self, h, m , test_function_name, *test_params):
-        pi_hat, x_grid = OneDGridAprox(self, h, m)
+    def test_error(self, h, m, quad_rule, test_function_name, *test_params):
+        pi_hat, x_grid = OneDGridAprox(self, h, m, quad_rule)
         truth = TEST_FUNCTIONS[test_function_name](self.alpha, self.beta, *test_params)
         est = Eh_pi(pi_hat, x_grid, test_functions(test_function_name, *test_params))
         return abs(est - truth)
